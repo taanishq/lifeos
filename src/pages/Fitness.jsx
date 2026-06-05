@@ -4,12 +4,13 @@ import { Plus, Trash2, ChevronDown, ChevronUp, Sparkles, Edit3, Check, X } from 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import CustomSelect from "../components/CustomSelect";
 
-const categories = ["Push", "Pull", "Legs", "Running", "Sports", "Other"];
+const categories = ["Push", "Pull", "Legs", "Abs", "Running", "Sports", "Other"];
 
 const EXERCISE_SUGGESTIONS = {
   Push: ["Bench Press", "Overhead Press", "Incline Bench Press", "Dumbbell Shoulder Press", "Tricep Pushdown", "Dips", "Lateral Raises", "Cable Flyes", "Push Ups"],
   Pull: ["Pull Ups", "Barbell Row", "Cable Row", "Lat Pulldown", "Face Pulls", "Dumbbell Curl", "Hammer Curl", "Deadlift", "Shrugs"],
   Legs: ["Squat", "Romanian Deadlift", "Leg Press", "Leg Curl", "Leg Extension", "Calf Raises", "Bulgarian Split Squat", "Hip Thrust", "Lunges"],
+  Abs: ["Plank", "Russian Twist", "Decline Sit Up", "Ab Crunch", "Leg Raises", "Cable Crunch", "Hanging Knee Raise"],
   Running: [],
   Sports: [],
   Other: [],
@@ -20,6 +21,7 @@ const CATEGORY_COLORS = {
   Push: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
   Pull: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   Legs: "bg-green-500/20 text-green-400 border-green-500/30",
+  Abs: "bg-purple-500/20 text-purple-400 border-purple-500/30",
   Running: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   Sports: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
   Other: "bg-slate-500/20 text-slate-400 border-slate-500/30",
