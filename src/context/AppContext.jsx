@@ -55,16 +55,16 @@ export function AppProvider({ children }) {
         { data: certsData },
         { data: rentData },
       ] = await Promise.all([
-        supabase.from("goals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("meals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("workouts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("skills").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
-        supabase.from("contacts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("journal_entries").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("certifications").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
-        supabase.from("rent_history").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("goals").select("*").order("created_at", { ascending: false }),
+        supabase.from("meals").select("*").order("created_at", { ascending: false }),
+        supabase.from("workouts").select("*").order("created_at", { ascending: false }),
+        supabase.from("applications").select("*").order("created_at", { ascending: false }),
+        supabase.from("skills").select("*").order("created_at", { ascending: true }),
+        supabase.from("contacts").select("*").order("created_at", { ascending: false }),
+        supabase.from("transactions").select("*").order("created_at", { ascending: false }),
+        supabase.from("journal_entries").select("*").order("created_at", { ascending: false }),
+        supabase.from("certifications").select("*").order("created_at", { ascending: true }),
+        supabase.from("rent_history").select("*").order("created_at", { ascending: false }),
       ]);
 
       setGoalsState(goalsData || []);
