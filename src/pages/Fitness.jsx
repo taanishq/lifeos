@@ -4,13 +4,12 @@ import { Plus, Trash2, ChevronDown, ChevronUp, Sparkles, Edit3, Check, X } from 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import CustomSelect from "../components/CustomSelect";
 
-const categories = ["Push", "Pull", "Legs", "Abs", "Running", "Sports", "Other"];
+const categories = ["Push", "Pull", "Legs", "Running", "Sports", "Other"];
 
 const EXERCISE_SUGGESTIONS = {
   Push: ["Bench Press", "Overhead Press", "Incline Bench Press", "Dumbbell Shoulder Press", "Tricep Pushdown", "Dips", "Lateral Raises", "Cable Flyes", "Push Ups"],
   Pull: ["Pull Ups", "Barbell Row", "Cable Row", "Lat Pulldown", "Face Pulls", "Dumbbell Curl", "Hammer Curl", "Deadlift", "Shrugs"],
   Legs: ["Squat", "Romanian Deadlift", "Leg Press", "Leg Curl", "Leg Extension", "Calf Raises", "Bulgarian Split Squat", "Hip Thrust", "Lunges"],
-  Abs: ["Plank", "Russian Twist", "Decline Sit Up", "Ab Crunch", "Leg Raises", "Cable Crunch", "Hanging Knee Raise"],
   Running: [],
   Sports: [],
   Other: [],
@@ -21,7 +20,6 @@ const CATEGORY_COLORS = {
   Push: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
   Pull: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   Legs: "bg-green-500/20 text-green-400 border-green-500/30",
-  Abs: "bg-purple-500/20 text-purple-400 border-purple-500/30",
   Running: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   Sports: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
   Other: "bg-slate-500/20 text-slate-400 border-slate-500/30",
@@ -215,15 +213,55 @@ function RunningChart({ workouts }) {
 }
 
 // ── Workout Card ───────────────────────────────────────────────────
-function WorkoutCard({ workout, onDelete, unit }) {
+function WorkoutCard({ workout, onDelete, onUpdate, unit }) {
   const [expanded, setExpanded] = useState(false);
-  const convert = (w) => unit === "kg" ? (w / 2.205).toFixed(1) : w;
+  const [editing, setEditing] = useState(false);
+  const [editData, setEditData] = useState(null);
+
+  const convert = (w) => unit === "kg" ? (Number(w) / 2.205).toFixed(1) : w;
+
+  const startEdit = () => {
+    setEditData(JSON.parse(JSON.stringify(workout)));
+    setEditing(true);
+    setExpanded(true);
+  };
+
+  const saveEdit = () => { onUpdate(editData); setEditing(false); };
+
+  const updateExName = (ei, val) => {
+    const d = { ...editData, exercises: [...editData.exercises] };
+    d.exercises[ei] = { ...d.exercises[ei], name: val };
+    setEditData(d);
+  };
+
+  const updateSetField = (ei, si, field, val) => {
+    const d = { ...editData, exercises: [...editData.exercises] };
+    const sets = [...d.exercises[ei].sets];
+    sets[si] = { ...sets[si], [field]: val };
+    d.exercises[ei] = { ...d.exercises[ei], sets };
+    setEditData(d);
+  };
+
+  const addSet = (ei) => {
+    const d = { ...editData, exercises: [...editData.exercises] };
+    d.exercises[ei] = { ...d.exercises[ei], sets: [...d.exercises[ei].sets, { weight: "", reps: "" }] };
+    setEditData(d);
+  };
+
+  const removeSet = (ei, si) => {
+    const d = { ...editData, exercises: [...editData.exercises] };
+    d.exercises[ei] = { ...d.exercises[ei], sets: d.exercises[ei].sets.filter((_, i) => i !== si) };
+    setEditData(d);
+  };
+
+  const addExercise = () => setEditData(d => ({ ...d, exercises: [...d.exercises, { name: "", sets: [{ weight: "", reps: "" }] }] }));
+  const removeExercise = (ei) => setEditData(d => ({ ...d, exercises: d.exercises.filter((_, i) => i !== ei) }));
 
   return (
     <div className="card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className={`badge border ${CATEGORY_COLORS[workout.category]}`}>{workout.category}</span>
+          <span className={`badge border ${CATEGORY_COLORS[workout.category] || CATEGORY_COLORS.Other}`}>{workout.category}</span>
           <span className="text-sm text-slate-400">{workout.date}</span>
           <span className="text-xs text-slate-600">
             {workout.category === "Running"
@@ -235,13 +273,17 @@ function WorkoutCard({ workout, onDelete, unit }) {
           <button onClick={() => setExpanded(!expanded)} className="text-slate-400 hover:text-white">
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
+          <button onClick={startEdit} className="text-slate-400 hover:text-indigo-400" title="Edit">
+            <Edit3 size={15} />
+          </button>
           <button onClick={() => onDelete(workout.id)} className="text-slate-600 hover:text-red-400">
             <Trash2 size={15} />
           </button>
         </div>
       </div>
 
-      {expanded && (
+      {/* View mode */}
+      {expanded && !editing && (
         <div className="mt-4 space-y-3 border-t border-white/5 pt-4">
           {workout.category === "Running" ? (
             <div className="flex gap-4 text-sm text-slate-300">
@@ -264,6 +306,45 @@ function WorkoutCard({ workout, onDelete, unit }) {
             ))
           )}
           {workout.notes && <p className="text-xs text-slate-500">{workout.notes}</p>}
+        </div>
+      )}
+
+      {/* Edit mode */}
+      {editing && editData && (
+        <div className="mt-4 space-y-4 border-t border-white/5 pt-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-white font-medium">Editing workout</span>
+            <input type="date" className="input w-40 text-sm" value={editData.date}
+              onChange={e => setEditData(d => ({ ...d, date: e.target.value }))} />
+          </div>
+          {editData.exercises?.map((ex, ei) => (
+            <div key={ei} className="bg-white/3 rounded-xl p-3 space-y-2">
+              <div className="flex gap-2">
+                <input className="input flex-1 text-sm" value={ex.name} placeholder="Exercise name..."
+                  onChange={e => updateExName(ei, e.target.value)} />
+                <button onClick={() => removeExercise(ei)} className="text-slate-600 hover:text-red-400"><Trash2 size={14} /></button>
+              </div>
+              {ex.sets?.map((set, si) => (
+                <div key={si} className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-12">Set {si + 1}</span>
+                  <input className="input text-sm w-24" placeholder={unit} value={set.weight}
+                    onChange={e => updateSetField(ei, si, "weight", e.target.value)} />
+                  <span className="text-slate-600">×</span>
+                  <input className="input text-sm w-24" placeholder="reps" value={set.reps}
+                    onChange={e => updateSetField(ei, si, "reps", e.target.value)} />
+                  <button onClick={() => removeSet(ei, si)} className="text-slate-600 hover:text-red-400"><X size={13} /></button>
+                </div>
+              ))}
+              <button onClick={() => addSet(ei)} className="text-xs text-indigo-400 hover:text-indigo-300">+ Add set</button>
+            </div>
+          ))}
+          <button onClick={addExercise} className="btn-secondary w-full text-sm">+ Add Exercise</button>
+          <input className="input text-sm" placeholder="Notes..." value={editData.notes || ""}
+            onChange={e => setEditData(d => ({ ...d, notes: e.target.value }))} />
+          <div className="flex gap-2">
+            <button onClick={saveEdit} className="btn-primary flex items-center gap-2"><Check size={15} /> Save</button>
+            <button onClick={() => setEditing(false)} className="btn-secondary">Cancel</button>
+          </div>
         </div>
       )}
     </div>
@@ -362,6 +443,7 @@ export default function Fitness() {
   };
 
   const handleDelete = (id) => setWorkouts(prev => prev.filter(w => w.id !== id));
+  const handleUpdate = (updated) => setWorkouts(prev => prev.map(w => w.id === updated.id ? updated : w));
 
   const suggestions = EXERCISE_SUGGESTIONS[form.category] || [];
 
@@ -495,7 +577,7 @@ export default function Fitness() {
         <div className="space-y-3">
           {workouts.length === 0 && <div className="card text-center text-slate-500 py-8">No workouts logged yet.</div>}
           {[...workouts].sort((a, b) => b.date?.localeCompare(a.date)).map(w => (
-            <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} unit={unit} />
+            <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} onUpdate={handleUpdate} unit={unit} />
           ))}
         </div>
       )}
