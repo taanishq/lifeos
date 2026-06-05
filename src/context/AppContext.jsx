@@ -16,8 +16,11 @@ export function AppProvider({ children }) {
   const [certifications, setCertificationsState] = useState([]);
   const [rentHistory, setRentHistoryState] = useState([]);
   const [myMoneyBalance, setMyMoneyBalanceState] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("los_mymoney")) || 5000; } catch { return 5000; }
-  });
+  try {
+    const saved = localStorage.getItem("los_mymoney");
+    return saved ? JSON.parse(saved) : 5000;
+  } catch { return 5000; }
+});
   const [nutritionTargets, setNutritionTargetsState] = useState(() => {
     try { return JSON.parse(localStorage.getItem("los_targets")) || { calories: 2800, protein: 180, carbs: 300, fat: 80 }; } catch { return { calories: 2800, protein: 180, carbs: 300, fat: 80 }; }
   });
@@ -289,7 +292,10 @@ export function AppProvider({ children }) {
     }
   };
 
-  const setMyMoneyBalance = (val) => setMyMoneyBalanceState(val);
+  const setMyMoneyBalance = (val) => {
+  setMyMoneyBalanceState(val);
+  localStorage.setItem("los_mymoney", JSON.stringify(val));
+};
   const setNutritionTargets = (val) => setNutritionTargetsState(val);
 
   // ── Computed values ──
