@@ -166,6 +166,11 @@ export function AppProvider({ children }) {
       await supabase.from("workouts").delete().eq("id", removed.id);
       setWorkoutsState(prev => prev.filter(w => w.id !== removed.id));
     }
+    const updated = next.find(n => { const old = workouts.find(w => w.id === n.id); return old && JSON.stringify(old) !== JSON.stringify(n); });
+if (updated) {
+  await supabase.from("workouts").update({ date: updated.date, category: updated.category, notes: updated.notes, exercises: updated.exercises }).eq("id", updated.id);
+  setWorkoutsState(prev => prev.map(w => w.id === updated.id ? { ...w, ...updated } : w));
+}
   };
 
   // ── Transactions ──
@@ -304,8 +309,8 @@ export function AppProvider({ children }) {
   };
 
   const setMyMoneyBalance = (val) => {
-    setMyMoneyBalanceState(val);
-    supabase.auth.updateUser({ data: { myMoneyBalance: val } });
+  setMyMoneyBalanceState(val);
+  localStorage.setItem("los_mymoney", JSON.stringify(val));
   };
 
   const setNutritionTargets = (val) => {

@@ -48,15 +48,20 @@ export default function Nutrition() {
     fat: a.fat + (m.fat || 0),
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
-  const weekData = [
-    { day: "Mon", calories: 2600, protein: 165 },
-    { day: "Tue", calories: 2850, protein: 180 },
-    { day: "Wed", calories: 2400, protein: 190 },
-    { day: "Thu", calories: 2750, protein: 170 },
-    { day: "Fri", calories: 2900, protein: 185 },
-    { day: "Sat", calories: 3100, protein: 155 },
-    { day: "Sun", calories: totals.calories, protein: totals.protein },
-  ];
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split("T")[0];
+  });
+
+  const weekData = last7Days.map(date => {
+    const dayMeals = meals.filter(m => m.date === date);
+    return {
+      day: new Date(date).toLocaleDateString("en-US", { weekday: "short" }),
+      calories: dayMeals.reduce((s, m) => s + (m.calories || 0), 0),
+      protein: dayMeals.reduce((s, m) => s + (m.protein || 0), 0),
+    };
+  });
 
   const handleAnalyze = async () => {
     if (!form.foods.trim()) return;
