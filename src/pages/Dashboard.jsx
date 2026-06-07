@@ -32,7 +32,7 @@ export default function Dashboard() {
   const {
     goalsCompleted, goalsTotal, todayCalories, todayProtein,
     todayWorkout, todaySpend, nutritionTargets, myMoneyBalance,
-    applications, skills, meals, todayGoals
+    applications, skills, meals, todayGoals, setMeals
   } = useApp();
 
   const [todayMealPlans, setTodayMealPlans] = useState([]);
@@ -41,14 +41,21 @@ export default function Dashboard() {
   const dayNumber = dayOfWeek === 0 ? 7 : dayOfWeek;
 
   useEffect(() => {
+    const weekNum = Math.ceil((Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 1)) / 86400000) + 1) / 7) % 3 || 3;
     supabase.from("meal_plans").select("*")
       .eq("day_number", dayNumber)
-      .order("meal_type")
+      .eq("week_number", weekNum)
+      .order("created_at")
       .then(({ data }) => { if (data) setTodayMealPlans(data); });
   }, [dayNumber]);
 
   const logPlannedMeal = async (plan) => {
-    const { setMeals } = useApp();
+    setMeals(prev => [...prev, {
+      id: Date.now(), date: today, meal: plan.meal_type, foods: plan.foods,
+      calories: plan.calories, protein: plan.protein, carbs: plan.carbs, fat: plan.fat
+    }]);
+    await supabase.from("meal_plans").update({ logged: true, log_date: today }).eq("id", plan.id);
+    setTodayMealPlans(prev => prev.map(p => p.id === plan.id ? { ...p, logged: true, log_date: today } : p));
   };
 
   const calorieProgress = Math.round((todayCalories / nutritionTargets.calories) * 100);
