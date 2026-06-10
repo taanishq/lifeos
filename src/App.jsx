@@ -62,3 +62,6 @@ export default function App() {
 
   return <AppShell />;
 }
+import SpotifyCallback from "./pages/SpotifyCallback";
+// inside Routes:
+<Route path="/callback" element={<SpotifyCallback />} />

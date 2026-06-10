@@ -27,6 +27,9 @@ function StatCard({ icon: Icon, label, value, sub, color, progress }) {
     </div>
   );
 }
+import SpotifyWidget from "../components/SpotifyWidget";
+// somewhere in the dashboard JSX:
+<SpotifyWidget />
 
 export default function Dashboard() {
   const {
