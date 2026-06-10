@@ -11,6 +11,7 @@ import CareerTracker from "./pages/CareerTracker";
 import Finance from "./pages/Finance";
 import Journal from "./pages/Journal";
 import Login from "./pages/Login";
+import SpotifyCallback from "./pages/SpotifyCallback";
 
 function AppShell() {
   return (
@@ -28,6 +29,7 @@ function AppShell() {
                 <Route path="/career" element={<CareerTracker />} />
                 <Route path="/finance" element={<Finance />} />
                 <Route path="/journal" element={<Journal />} />
+                <Route path="/callback" element={<SpotifyCallback />} />
               </Routes>
             </div>
           </main>
@@ -62,6 +64,3 @@ export default function App() {
 
   return <AppShell />;
 }
-import SpotifyCallback from "./pages/SpotifyCallback";
-// inside Routes:
-<Route path="/callback" element={<SpotifyCallback />} />

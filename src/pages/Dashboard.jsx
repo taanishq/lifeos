@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContai
 import { Target, Flame, Dumbbell, DollarSign, TrendingUp, BookOpen, Zap, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
+import SpotifyWidget from "../components/SpotifyWidget";
 
 function StatCard({ icon: Icon, label, value, sub, color, progress }) {
   return (
@@ -27,9 +28,6 @@ function StatCard({ icon: Icon, label, value, sub, color, progress }) {
     </div>
   );
 }
-import SpotifyWidget from "../components/SpotifyWidget";
-// somewhere in the dashboard JSX:
-<SpotifyWidget />
 
 export default function Dashboard() {
   const {
@@ -74,7 +72,6 @@ export default function Dashboard() {
 
   const weekScore = Math.round((goalProgress * 0.4) + (calorieProgress * 0.3) + (proteinProgress * 0.3));
 
-  // Real nutrition data for last 7 days
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -99,6 +96,9 @@ export default function Dashboard() {
           {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
         </p>
       </div>
+
+      {/* Spotify Widget */}
+      <SpotifyWidget />
 
       {/* Weekly score banner */}
       <div className="card bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border-indigo-500/20">
@@ -148,7 +148,7 @@ export default function Dashboard() {
           value={`${avgSkill}%`} sub="finance skills" progress={avgSkill} />
       </div>
 
-      {/* Nutrition chart - real data */}
+      {/* Nutrition chart */}
       <div className="card">
         <h3 className="text-white font-semibold mb-4">Nutrition This Week</h3>
         {nutritionWeekData.every(d => d.calories === 0) ? (
@@ -179,7 +179,6 @@ export default function Dashboard() {
 
       {/* Bottom row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's goals */}
         <div className="card lg:col-span-2">
           <h3 className="text-white font-semibold mb-4">Today's Goals</h3>
           <div className="space-y-2">
@@ -198,7 +197,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Today's meal plan */}
         <div className="card">
           <h3 className="text-white font-semibold mb-4">Today's Meal Plan</h3>
           <div className="space-y-2">
@@ -213,6 +211,12 @@ export default function Dashboard() {
                     <p className="text-slate-400 truncate mt-0.5">{plan.foods}</p>
                     <p className="text-slate-600 mt-0.5">🔥 {plan.calories} cal · 💪 {plan.protein}g</p>
                   </div>
+                  {!(plan.logged && plan.log_date === today) && (
+                    <button onClick={() => logPlannedMeal(plan)}
+                      className="w-6 h-6 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-400 hover:bg-green-500/30 transition-all flex-shrink-0">
+                      <Check size={11} />
+                    </button>
+                  )}
                   {plan.logged && plan.log_date === today && (
                     <Check size={14} className="text-green-400 flex-shrink-0" />
                   )}
@@ -223,7 +227,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Skills snapshot */}
+      {/* Skills */}
       <div className="card">
         <h3 className="text-white font-semibold mb-4">Finance Skills</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
