@@ -42,13 +42,11 @@ export default function Nutrition() {
   const [form, setForm] = useState({ meal: "Breakfast", foods: "", date: today });
   const [tempTargets, setTempTargets] = useState(nutritionTargets);
 
-  // Meal plan state
   const [mealPlans, setMealPlans] = useState([]);
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [expandedDay, setExpandedDay] = useState(null);
   const [importing, setImporting] = useState(false);
 
-  // Favorites state
   const [favorites, setFavorites] = useState([]);
   const [showFavForm, setShowFavForm] = useState(false);
   const [favForm, setFavForm] = useState({ name: "", foods: "", calories: "", protein: "", carbs: "", fat: "" });
@@ -86,7 +84,6 @@ export default function Nutrition() {
     };
   });
 
-  // ── Log meal ──
   const handleAnalyze = async () => {
     if (!form.foods.trim()) return;
     setAnalyzing(true);
@@ -102,7 +99,6 @@ export default function Nutrition() {
   const handleDelete = (id) => setMeals(prev => prev.filter(m => m.id !== id));
   const saveTargets = () => { setNutritionTargets(tempTargets); setShowTargets(false); };
 
-  // ── Meal plan: log planned meal ──
   const logPlannedMeal = async (plan) => {
     const newMeal = {
       id: Date.now(), date: today, meal: plan.meal_type, foods: plan.foods,
@@ -113,7 +109,6 @@ export default function Nutrition() {
     setMealPlans(prev => prev.map(p => p.id === plan.id ? { ...p, logged: true, log_date: today } : p));
   };
 
-  // ── Excel import ──
   const handleExcelImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -123,7 +118,6 @@ export default function Nutrition() {
       const wb = XLSX.read(buffer);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws);
-
       const plans = rows.map(row => ({
         week_number: Number(row["Week"] || row["week"] || 1),
         day_number: Number(row["Day"] || row["day"] || 1),
@@ -136,19 +130,19 @@ export default function Nutrition() {
         logged: false,
         log_date: "",
       })).filter(p => p.foods);
-
       await supabase.from("meal_plans").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      const { data } = await supabase.from("meal_plans").insert(plans).select();
+      const { data: { user } } = await supabase.auth.getUser();
+      const plansWithUser = plans.map(p => ({ ...p, user_id: user.id }));
+      const { data } = await supabase.from("meal_plans").insert(plansWithUser).select();
       if (data) setMealPlans(data);
       alert(`Imported ${data?.length || 0} meals successfully!`);
-    } catch (err) {
+    } catch {
       alert("Could not read Excel file. Make sure columns are: Week, Day, Meal, Foods, Calories, Protein, Carbs, Fat");
     }
     setImporting(false);
     e.target.value = "";
   };
 
-  // ── Favorites ──
   const analyzeFavorite = async () => {
     if (!favForm.foods.trim()) return;
     setAnalyzingFav(true);
@@ -161,12 +155,14 @@ export default function Nutrition() {
 
   const saveFavorite = async () => {
     if (!favForm.name.trim() || !favForm.foods.trim()) return;
+    const { data: { user } } = await supabase.auth.getUser();
     const fav = {
       name: favForm.name, foods: favForm.foods,
       calories: Number(favForm.calories) || 0,
       protein: Number(favForm.protein) || 0,
       carbs: Number(favForm.carbs) || 0,
       fat: Number(favForm.fat) || 0,
+      user_id: user.id,
     };
     const { data } = await supabase.from("favorite_meals").insert([fav]).select().single();
     if (data) setFavorites(prev => [...prev, data]);
@@ -186,7 +182,6 @@ export default function Nutrition() {
     setFavorites(prev => prev.filter(f => f.id !== id));
   };
 
-  // Group meal plan by week and day
   const weekPlans = mealPlans.filter(p => p.week_number === selectedWeek);
   const weeks = [...new Set(mealPlans.map(p => p.week_number))].sort();
 
@@ -214,7 +209,6 @@ export default function Nutrition() {
         </div>
       </div>
 
-      {/* Macro rings */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MacroRing label="Calories" value={totals.calories} target={nutritionTargets.calories} color="#f97316" />
         <MacroRing label="Protein (g)" value={totals.protein} target={nutritionTargets.protein} color="#22c55e" />
@@ -222,7 +216,6 @@ export default function Nutrition() {
         <MacroRing label="Fat (g)" value={totals.fat} target={nutritionTargets.fat} color="#a855f7" />
       </div>
 
-      {/* Targets */}
       {showTargets && (
         <div className="card border-indigo-500/20">
           <h3 className="text-white font-semibold mb-4">Set Daily Targets</h3>
@@ -242,7 +235,6 @@ export default function Nutrition() {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex gap-1 bg-white/3 rounded-xl p-1">
         {tabs.map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
@@ -276,7 +268,6 @@ export default function Nutrition() {
             </div>
           )}
 
-          {/* Weekly chart */}
           <div className="card">
             <h3 className="text-white font-semibold mb-4">This Week</h3>
             <ResponsiveContainer width="100%" height={200}>
@@ -291,7 +282,6 @@ export default function Nutrition() {
             </ResponsiveContainer>
           </div>
 
-          {/* Today's meals */}
           <div>
             <h3 className="text-white font-semibold mb-3">Today's Meals</h3>
             <div className="space-y-3">
@@ -321,7 +311,6 @@ export default function Nutrition() {
       {/* MEAL PLAN TAB */}
       {activeTab === "Meal Plan" && (
         <div className="space-y-4">
-          {/* Import Excel */}
           <div className="card border-dashed border-white/20">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
@@ -334,8 +323,6 @@ export default function Nutrition() {
                 <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleExcelImport} />
               </label>
             </div>
-
-            {/* Template download hint */}
             <div className="mt-3 p-3 bg-white/3 rounded-xl text-xs text-slate-500">
               <span className="text-indigo-400 font-medium">Excel format example:</span>
               <div className="mt-1 font-mono">Week | Day | Meal | Foods | Calories | Protein | Carbs | Fat</div>
@@ -343,7 +330,6 @@ export default function Nutrition() {
             </div>
           </div>
 
-          {/* Week selector */}
           {weeks.length > 0 && (
             <div className="flex gap-2 flex-wrap">
               {weeks.map(w => (
@@ -355,7 +341,6 @@ export default function Nutrition() {
             </div>
           )}
 
-          {/* Days */}
           {weeks.length === 0 && (
             <div className="card text-center text-slate-500 py-8">
               No meal plan imported yet. Upload an Excel file above.

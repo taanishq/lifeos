@@ -55,16 +55,16 @@ export function AppProvider({ children }) {
         { data: certsData },
         { data: rentData },
       ] = await Promise.all([
-        supabase.from("goals").select("*").order("created_at", { ascending: false }),
-        supabase.from("meals").select("*").order("created_at", { ascending: false }),
-        supabase.from("workouts").select("*").order("created_at", { ascending: false }),
-        supabase.from("applications").select("*").order("created_at", { ascending: false }),
-        supabase.from("skills").select("*").order("created_at", { ascending: true }),
-        supabase.from("contacts").select("*").order("created_at", { ascending: false }),
-        supabase.from("transactions").select("*").order("created_at", { ascending: false }),
-        supabase.from("journal_entries").select("*").order("created_at", { ascending: false }),
-        supabase.from("certifications").select("*").order("created_at", { ascending: true }),
-        supabase.from("rent_history").select("*").order("created_at", { ascending: false }),
+        supabase.from("goals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("meals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("workouts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("skills").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
+        supabase.from("contacts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("journal_entries").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("certifications").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
+        supabase.from("rent_history").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
 
       setGoalsState(goalsData || []);
@@ -112,7 +112,7 @@ export function AppProvider({ children }) {
     if (added) {
       const { data } = await supabase.from("goals").insert([{
         title: added.title, category: added.category, priority: added.priority,
-        date: added.date, completed: added.completed, notes: added.notes, 
+        date: added.date, completed: added.completed, notes: added.notes, user_id: user.id
       }]).select().single();
       if (data) setGoalsState(prev => [data, ...prev.filter(g => g.id !== added.id)]);
       return;
@@ -137,7 +137,7 @@ export function AppProvider({ children }) {
     if (added) {
       const { data } = await supabase.from("meals").insert([{
         date: added.date, meal: added.meal, foods: added.foods,
-        calories: added.calories, protein: added.protein, carbs: added.carbs, fat: added.fat
+        calories: added.calories, protein: added.protein, carbs: added.carbs, fat: added.fat, user_id: user.id
       }]).select().single();
       if (data) setMealsState(prev => [data, ...prev.filter(m => m.id !== added.id)]);
       return;
@@ -156,7 +156,7 @@ export function AppProvider({ children }) {
     if (added) {
       const { data } = await supabase.from("workouts").insert([{
         date: added.date, category: added.category, notes: added.notes,
-        exercises: added.exercises, 
+        exercises: added.exercises, user_id: user.id
       }]).select().single();
       if (data) setWorkoutsState(prev => [data, ...prev.filter(w => w.id !== added.id)]);
       return;
@@ -175,7 +175,7 @@ export function AppProvider({ children }) {
     if (added) {
       const { data } = await supabase.from("transactions").insert([{
         date: added.date, description: added.description, amount: added.amount,
-        category: added.category, used_my_money: added.usedMyMoney || false, 
+        category: added.category, used_my_money: added.usedMyMoney || false, user_id: user.id
       }]).select().single();
       if (data) setTransactionsState(prev => [{ ...data, usedMyMoney: data.used_my_money }, ...prev.filter(t => t.id !== added.id)]);
       return;
@@ -201,7 +201,7 @@ export function AppProvider({ children }) {
       const { data } = await supabase.from("applications").insert([{
         company: added.company, role: added.role, location: added.location,
         date_applied: added.dateApplied, status: added.status,
-        interview_dates: added.interviewDates, notes: added.notes, 
+        interview_dates: added.interviewDates, notes: added.notes, user_id: user.id
       }]).select().single();
       if (data) setApplicationsState(prev => [{ ...data, dateApplied: data.date_applied, interviewDates: data.interview_dates }, ...prev.filter(a => a.id !== added.id)]);
       return;
@@ -236,7 +236,7 @@ export function AppProvider({ children }) {
     if (added) {
       const { data } = await supabase.from("contacts").insert([{
         name: added.name, company: added.company, position: added.position,
-        date_contacted: added.dateContacted, follow_up: added.followUp, notes: added.notes, 
+        date_contacted: added.dateContacted, follow_up: added.followUp, notes: added.notes, user_id: user.id
       }]).select().single();
       if (data) setContactsState(prev => [{ ...data, dateContacted: data.date_contacted, followUp: data.follow_up }, ...prev.filter(c => c.id !== added.id)]);
       return;
@@ -255,7 +255,7 @@ export function AppProvider({ children }) {
     if (added) {
       const { data } = await supabase.from("journal_entries").insert([{
         date: added.date, went_well: added.wentWell, could_be_better: added.couldBeBetter,
-        learned: added.learned, grateful: added.grateful, free_form: added.freeForm, 
+        learned: added.learned, grateful: added.grateful, free_form: added.freeForm, user_id: user.id
       }]).select().single();
       if (data) setJournalEntriesState(prev => [{ ...data, wentWell: data.went_well, couldBeBetter: data.could_be_better, freeForm: data.free_form }, ...prev.filter(e => e.id !== added.id)]);
       return;
@@ -273,7 +273,7 @@ export function AppProvider({ children }) {
     const added = next.find(n => !certifications.find(c => c.id === n.id));
     if (added) {
       const { data } = await supabase.from("certifications").insert([{
-        name: added.name, progress: added.progress, completed: added.completed, 
+        name: added.name, progress: added.progress, completed: added.completed, user_id: user.id
       }]).select().single();
       if (data) setCertificationsState(prev => [...prev, data]);
       return;
@@ -291,7 +291,7 @@ export function AppProvider({ children }) {
     const added = next.find(n => !rentHistory.find(r => r.id === n.id));
     if (added) {
       const { data } = await supabase.from("rent_history").insert([{
-        date: added.date, amount: added.amount, notes: added.notes, 
+        date: added.date, amount: added.amount, notes: added.notes, user_id: user.id
       }]).select().single();
       if (data) setRentHistoryState(prev => [data, ...prev.filter(r => r.id !== added.id)]);
       return;
