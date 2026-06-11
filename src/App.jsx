@@ -1,38 +1,49 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { supabase } from "./supabase";
 import Sidebar from "./components/Sidebar";
+import AmbientBackground from "./components/AmbientBackground";
 import Dashboard from "./pages/Dashboard";
 import Goals from "./pages/Goals";
 import Nutrition from "./pages/Nutrition";
 import Fitness from "./pages/Fitness";
 import CareerTracker from "./pages/CareerTracker";
 import Finance from "./pages/Finance";
+import Guitar from "./pages/Guitar";
 import Journal from "./pages/Journal";
 import Login from "./pages/Login";
 import SpotifyCallback from "./pages/SpotifyCallback";
-import Guitar from "./pages/Guitar";
+
+// Must be inside BrowserRouter to use useLocation
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="page-enter max-w-7xl mx-auto px-4 md:px-8 py-8 pt-16 md:pt-8">
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/goals" element={<Goals />} />
+        <Route path="/nutrition" element={<Nutrition />} />
+        <Route path="/fitness" element={<Fitness />} />
+        <Route path="/career" element={<CareerTracker />} />
+        <Route path="/finance" element={<Finance />} />
+        <Route path="/guitar" element={<Guitar />} />
+        <Route path="/journal" element={<Journal />} />
+        <Route path="/callback" element={<SpotifyCallback />} />
+      </Routes>
+    </div>
+  );
+}
+
 function AppShell() {
   return (
     <AppProvider>
       <BrowserRouter>
-        <div className="flex h-screen overflow-hidden bg-[#0f1117]">
+        <AmbientBackground />
+        <div className="flex h-screen overflow-hidden">
           <Sidebar />
           <main className="flex-1 overflow-y-auto">
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 pt-16 md:pt-8">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/goals" element={<Goals />} />
-                <Route path="/nutrition" element={<Nutrition />} />
-                <Route path="/fitness" element={<Fitness />} />
-                <Route path="/career" element={<CareerTracker />} />
-                <Route path="/finance" element={<Finance />} />
-                <Route path="/journal" element={<Journal />} />
-                <Route path="/callback" element={<SpotifyCallback />} />
-                <Route path="/guitar" element={<Guitar />} />
-              </Routes>
-            </div>
+            <AnimatedRoutes />
           </main>
         </div>
       </BrowserRouter>
@@ -55,8 +66,9 @@ export default function App() {
 
   if (session === undefined) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0f1117]">
-        <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#07080d" }}>
+        <div style={{ width: 40, height: 40, border: "2px solid #6366f1", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
