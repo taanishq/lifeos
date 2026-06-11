@@ -35,3 +35,12 @@ export const dailySummary = async (data) => {
   });
   return res.json();
 };
+
+export const analyzeGuitar = async (content, songTitle, artist) => {
+  const res = await fetch(`${BASE}/api/analyze-guitar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content, songTitle, artist }),
+  });
+  return res.json();
+};

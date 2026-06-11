@@ -12,7 +12,7 @@ import Finance from "./pages/Finance";
 import Journal from "./pages/Journal";
 import Login from "./pages/Login";
 import SpotifyCallback from "./pages/SpotifyCallback";
-
+import Guitar from "./pages/Guitar";
 function AppShell() {
   return (
     <AppProvider>
@@ -30,6 +30,7 @@ function AppShell() {
                 <Route path="/finance" element={<Finance />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/callback" element={<SpotifyCallback />} />
+                <Route path="/guitar" element={<Guitar />} />
               </Routes>
             </div>
           </main>

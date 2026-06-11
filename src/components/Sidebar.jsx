@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "../supabase";
+import { Music } from "lucide-react";
 
 const links = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -14,6 +15,7 @@ const links = [
   { to: "/career", icon: Briefcase, label: "Career" },
   { to: "/finance", icon: CreditCard, label: "Finance" },
   { to: "/journal", icon: BookOpen, label: "Journal" },
+  { to: "/guitar", icon: Music, label: "Guitar" },
 ];
 
 export default function Sidebar() {
