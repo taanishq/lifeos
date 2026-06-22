@@ -3,6 +3,7 @@ import { useApp } from "../context/AppContext";
 import { Plus, Trash2, ChevronDown, ChevronUp, Sparkles, Edit3, Check, X } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import CustomSelect from "../components/CustomSelect";
+import FitnessPlan from "./FitnessPlan";
 
 const categories = ["Push", "Pull", "Legs", "Running", "Sports", "Other"];
 
@@ -475,7 +476,7 @@ export default function Fitness() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-white/3 rounded-xl p-1">
-        {["Log", "Calendar", "Strength", "Running"].map(tab => (
+        {["Log", "Calendar", "Strength", "Running", "My Plan"].map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}>
             {tab}
@@ -585,6 +586,7 @@ export default function Fitness() {
       {activeTab === "Calendar" && <WorkoutCalendar workouts={workouts} />}
       {activeTab === "Strength" && <StrengthChart workouts={workouts} />}
       {activeTab === "Running" && <RunningChart workouts={workouts} />}
+      {activeTab === "My Plan" && <FitnessPlan />}
     </div>
   );
 }
